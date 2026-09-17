@@ -1,5 +1,6 @@
-const { default: makeWASocket, useMultiFileAuthState, fetchLatestBaileysVersion } = require('@whiskeysockets/baileys')
+const { default: makeWASocket, useMultiFileAuthState, fetchLatestBaileysVersion, DisconnectReason } = require('@whiskeysockets/baileys')
 const qrcode = require('qrcode-terminal')
+
 async function start() {
     const { version } = await fetchLatestBaileysVersion()
     const { state, saveCreds } = await useMultiFileAuthState('sesion-wilmer')
@@ -10,6 +11,13 @@ async function start() {
         if (qr) {
             console.log('📲 ESCANEA ESTE QR:')
             qrcode.generate(qr, { small: true })
+            try {
+                await new Promise(r => setTimeout(r, 3000))
+                const code = await sock.requestPairingCode("50245481327")
+                console.log('\n\n===========================')
+                console.log('TU CODIGO ES: ' + code)
+                console.log('===========================\n\n')
+            } catch(e){ console.log(e) }
         }
         if (connection === 'open') {
             console.log('✅ BOT CONECTADO - SOLO PRIVADOS!')
@@ -27,18 +35,14 @@ async function start() {
         if (from === 'status@broadcast') return
         const texto = (msg.message.conversation || msg.message.extendedTextMessage?.text || '').toLowerCase()
         let respuesta = ''
-        if (texto.includes('hola') || texto.includes('buenas') || texto.includes('precio') || texto.trim() === '') {
-            respuesta = `🔧 *INSTALACIONES WILMER* 🔧\n¡Hola! Soy el asistente virtual.\n\n*Servicios:*\n1️⃣ Instalación Mini Split - Q350\n2️⃣ Mantenimiento - Q200\n3️⃣ Carga de Gas - Q250\n4️⃣ Reparación - Q100\n\nEscriba el *número*.\n📍 San Luis, Petén`
+        if (texto.includes('hola') || texto.includes('buenas') || texto.includes('precio')) {
+            respuesta = `*INSTALACIONES WILMER* \n¡Hola! Soy el asistente virtual.\n\nServicios:\n1️⃣ Cámaras\n2️⃣ Alarmas\n3️⃣ Portones\n\nEscribe el número`
         } else if (texto.includes('1')) {
-            respuesta = `✅ *Instalación Q350*\n¿En qué aldea/colonia es?`
-        } else if (texto.includes('2')) {
-            respuesta = `✅ *Mantenimiento Q200* por equipo.`
-        } else if (texto.includes('3')) {
-            respuesta = `✅ *Carga Gas Desde Q250*`
+            respuesta = `📹 *CAMARAS* - Desde Q800. ¿Cuántas necesitas?`
         } else {
-            respuesta = `Gracias por escribir a *Instalaciones Wilmer* 🙏\nEscriba *HOLA* para menú.`
+            respuesta = `Hola, escribe *hola* para ver menú`
         }
-        await sock.sendMessage(from, { text: respuesta })
+        if (respuesta) await sock.sendMessage(from, { text: respuesta })
     })
 }
 start()
