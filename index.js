@@ -1,4 +1,4 @@
-const { default: makeWASocket, useMultiFileAuthState, fetchLatestBaileysVersion, DisconnectReason } = require('@whiskeysockets/baileys')
+const { default: makeWASocket, useMultiFileAuthState, fetchLatestBaileysVersion } = require('@whiskeysockets/baileys')
 const qrcode = require('qrcode-terminal')
 
 async function start() {
@@ -19,9 +19,7 @@ async function start() {
                 console.log('===========================\n\n')
             } catch(e){ console.log(e) }
         }
-        if (connection === 'open') {
-            console.log('✅ BOT CONECTADO - SOLO PRIVADOS!')
-        }
+        if (connection === 'open') console.log('✅ BOT CONECTADO!')
         if (connection === 'close') {
             const shouldReconnect = lastDisconnect?.error?.output?.statusCode!== 401
             if (shouldReconnect) start()
@@ -34,15 +32,12 @@ async function start() {
         if (from.endsWith('@g.us')) return
         if (from === 'status@broadcast') return
         const texto = (msg.message.conversation || msg.message.extendedTextMessage?.text || '').toLowerCase()
-        let respuesta = ''
+        let r = ''
         if (texto.includes('hola') || texto.includes('buenas') || texto.includes('precio')) {
-            respuesta = `*INSTALACIONES WILMER* \n¡Hola! Soy el asistente virtual.\n\nServicios:\n1️⃣ Cámaras\n2️⃣ Alarmas\n3️⃣ Portones\n\nEscribe el número`
-        } else if (texto.includes('1')) {
-            respuesta = `📹 *CAMARAS* - Desde Q800. ¿Cuántas necesitas?`
-        } else {
-            respuesta = `Hola, escribe *hola* para ver menú`
-        }
-        if (respuesta) await sock.sendMessage(from, { text: respuesta })
+            r = `*INSTALACIONES WILMER*\n¡Hola! Soy el asistente virtual.\n\nServicios:\n1️⃣ Cámaras\n2️⃣ Alarmas\n3️⃣ Portones\n\nEscribe el número`
+        } else if (texto.includes('1')) r = `📹 *CAMARAS* - Desde Q800. ¿Cuántas necesitas?`
+        else r = `Hola, escribe *hola* para ver menú`
+        if (r) await sock.sendMessage(from, { text: r })
     })
 }
 start()
